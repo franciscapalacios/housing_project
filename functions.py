@@ -58,10 +58,23 @@ def modify_features(df):
     df.loc[df['BsmtQual']=='Po', 'BsmtQual'] = 'None'
 
     df.loc[df['GarageType'].isin(['Attchd', 'BuiltIn']), 'GoodGarageType'] = 1
+    df.loc[df['MSZoning'].isin(['RL', 'FV']), 'Zone'] = 1
 
     df = df.fillna(0)
 
     return df
+
+
+def add_location(x):
+    if 'MeadowV' in x or 'BrDale' in x or 'IDOTRR' in x or 'OldTown' in x or 'Blueste' in x or 'Edwards' in x or 'BrkSide' in x:
+        return 1
+    elif 'Sawyer' in x or 'Landmrk' in x or 'SWISU' in x or 'NAmes' in x or 'NPkVill' in x or 'Mitchel' in x or 'NWAmes' in x:
+        return 2
+    elif 'Gilbert' in x or 'SawyerW' in x or 'Blmngtn' in x or 'Crawfor' in x or 'CollgCr' in x or 'ClearCr' in x or 'Greens' in x:
+        return 3
+    else:
+        return 4
+    
 
 
 def encode_ordinal(df):
