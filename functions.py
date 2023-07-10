@@ -21,7 +21,7 @@ def missing_data_df(df):
 def impute_null(df):   
     
     # We have different types of null values:
-    # On numerical variables where N/A means no feature we will impute with 'None':
+    # On numerical variables where N/A means no feature we will impute with 0:
     numerical_na = ['GarageArea', 'GarageCars', 'BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF', 
                     'TotalBsmtSF', 'BsmtFullBath', 'BsmtHalfBath']
     df[numerical_na] = df[numerical_na].fillna(0)
@@ -36,10 +36,15 @@ def impute_null(df):
     # The remaining features with null values will be imputed as followed:
     # MasVnrType, MasVnrArea, Electrical, LotFrontage, GarageYrBlt
     df.loc[df.GarageYrBlt.isna(), 'GarageYrBlt'] = df[df.GarageYrBlt.isna()].YearBuilt
-    df.loc[df.LotFrontage.isna(), 'LotFrontage'] = df.LotFrontage.mean()
     df.loc[df.Electrical.isna(), 'Electrical'] = df.Electrical.mode()[0]
     df.loc[df.MasVnrType.isna(), 'MasVnrType'] = 'None'
     df.loc[df.MasVnrArea.isna(), 'MasVnrArea'] = 0
+
+    df.loc[(df.LotFrontage.isna()) & (df.LotConfig=='CulDSac'), 'LotFrontage'] = 47.5
+    df.loc[(df.LotFrontage.isna()) & (df.LotConfig=='FR2'), 'LotFrontage'] = 60
+    df.loc[(df.LotFrontage.isna()) & (df.LotConfig=='FR3'), 'LotFrontage'] = 62.5
+    df.loc[(df.LotFrontage.isna()) & (df.LotConfig=='Inside'), 'LotFrontage'] = 65
+    df.loc[(df.LotFrontage.isna()) & (df.LotConfig=='Corner'), 'LotFrontage'] = 80
 
     return df
 
