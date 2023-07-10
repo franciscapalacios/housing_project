@@ -49,27 +49,6 @@ def impute_null(df):
     return df
 
 
-def modify_features(df):
-    """
-
-    """
-
-    df['HouseAge'] = df['YrSold'] - df['YearBuilt']
-    df['RemodAge'] = df['YrSold'] - df['YearRemodAdd']
-
-    df.loc[df['GarageCars']>3, 'GarageCars'] = 3
-    df.loc[df['TotRmsAbvGrd']>9, 'TotRmsAbvGrd'] = 9
-    df.loc[df['Fireplaces']>2, 'Fireplaces'] = 2
-    df.loc[df['BsmtQual']=='Po', 'BsmtQual'] = 'None'
-
-    df.loc[df['GarageType'].isin(['Attchd', 'BuiltIn']), 'GoodGarageType'] = 1
-    df.loc[df['MSZoning'].isin(['RL', 'FV']), 'Zone'] = 1
-
-    df = df.fillna(0)
-
-    return df
-
-
 def add_location(x):
     if 'MeadowV' in x or 'BrDale' in x or 'IDOTRR' in x or 'OldTown' in x or 'Blueste' in x or 'Edwards' in x or 'BrkSide' in x:
         return 1
@@ -79,6 +58,34 @@ def add_location(x):
         return 3
     else:
         return 4
+    
+
+def modify_features(df):
+    """
+
+    """
+
+    # Merge uderpopulated categories
+    df.loc[df['GarageCars']>3, 'GarageCars'] = 3
+    df.loc[df['TotRmsAbvGrd']>9, 'TotRmsAbvGrd'] = 9
+    df.loc[df['Fireplaces']>2, 'Fireplaces'] = 2
+    df.loc[df['BsmtQual']=='Po', 'BsmtQual'] = 'None'
+    df.loc[df['LotShape']=='IR3', 'LotShape'] = 'IR2'
+
+    # Create new features
+    df.loc[df['YearBuilt']<1940, 'YearBuilt'] = 1940
+    df['HouseAge'] = df['YrSold'] - df['YearBuilt']
+    df['RemodAge'] = df['YrSold'] - df['YearRemodAdd']
+    df['Location'] = df.Neighborhood.map(add_location)
+
+    # Binarize features where only a few categories appear to be correlated to SalesPrice.
+    df.loc[df['GarageType'].isin(['Attchd', 'BuiltIn']), 'GoodGarageType'] = 1
+    df.loc[df['MSZoning'].isin(['RL', 'FV']), 'Zone'] = 1
+    df.loc[df['LotConfig'].isin(['CulDSac']), 'CulDSac'] = 1
+
+    df = df.fillna(0)
+
+    return df
     
 
 
@@ -100,4 +107,21 @@ def encode_ordinal(df):
     df.drop(columns=ordinal_features, inplace=True)
     df = pd.concat([df.reset_index(drop=True), X.reset_index(drop=True)], axis=1)
 
+    return df
+
+
+def dummify_features(df):
+    """
+    """
+
+    df = pd.get_dummies(df
+               ,columns = ['Location']
+               ,drop_first = True
+               )
+    
+    df = pd.get_dummies(df
+               ,columns = ['BldgType']
+               ,drop_first = True
+               )
+    
     return df
