@@ -72,17 +72,24 @@ def modify_features(df):
     df.loc[df['BsmtQual']=='Po', 'BsmtQual'] = 'None'
     df.loc[df['LotShape']=='IR3', 'LotShape'] = 'IR2'
 
+    df.loc[df['Foundation']=='Stone', 'Foundation'] = 'BrkTil'
+    df.loc[df['Foundation']=='Wood', 'Foundation'] = 'PConc'
+
     # Create new features
     df.loc[df['YearBuilt']<1940, 'YearBuilt'] = 1940
     df['HouseAge'] = df['YrSold'] - df['YearBuilt']
     df['RemodAge'] = df['YrSold'] - df['YearRemodAdd']
     df['Location'] = df.Neighborhood.map(add_location)
 
+
     # Binarize features where only a few categories appear to be correlated to SalesPrice.
     df.loc[df['GarageType'].isin(['Attchd', 'BuiltIn']), 'GoodGarageType'] = 1
     df.loc[df['MSZoning'].isin(['RL', 'FV']), 'Zone'] = 1
     df.loc[df['LotConfig'].isin(['CulDSac']), 'CulDSac'] = 1
+    df.loc[~df['Exterior1st'].isin(['CemntBd', 'VinylSd']), 'Exterior1st_top'] = 1
+    df.loc[df['2ndFlrSF']>0, 'TwoStory'] = 1
 
+    # Fill nulls created by .loc
     df = df.fillna(0)
 
     return df
@@ -120,8 +127,30 @@ def dummify_features(df):
                )
     
     df = pd.get_dummies(df
+               ,columns = ['Foundation']
+               ,drop_first = True
+               )
+    
+    df = pd.get_dummies(df
                ,columns = ['BldgType']
                ,drop_first = True
                )
     
     return df
+
+
+def df_engineered(df):
+
+    df = df[df.SaleCondition == 'Normal']
+    df = df[~df.MSZoning.isin(['C (all)', 'I (all)', 'A (all)', 'A (agr)'])] 
+
+    df = impute_null(df)
+    df = modify_features(df)
+    df = encode_ordinal(df)
+    df = dummify_features(df)
+
+    # Training and test sets 
+    df_2010 = df[df['YrSold']==2010].reset_index(drop=True)
+    df = df[df['YrSold']<2010].reset_index(drop=True)
+
+    return {'train':df, 'test':df_2010}
