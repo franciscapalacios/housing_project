@@ -80,6 +80,7 @@ def modify_features(df):
     df['HouseAge'] = df['YrSold'] - df['YearBuilt']
     df['RemodAge'] = df['YrSold'] - df['YearRemodAdd']
     df['Location'] = df.Neighborhood.map(add_location)
+    df['TotalSF'] = df['GrLivArea'] + df['TotalBsmtSF'] 
 
 
     # Binarize features where only a few categories appear to be correlated to SalesPrice.
@@ -87,7 +88,10 @@ def modify_features(df):
     df.loc[df['MSZoning'].isin(['RL', 'FV']), 'Zone'] = 1
     df.loc[df['LotConfig'].isin(['CulDSac']), 'CulDSac'] = 1
     df.loc[~df['Exterior1st'].isin(['CemntBd', 'VinylSd']), 'Exterior1st_top'] = 1
-    df.loc[df['2ndFlrSF']>0, 'TwoStory'] = 1
+    df.loc[df['FlrSF2nd']>0, 'TwoStory'] = 1
+    df.loc[df['OverallQual']>7, 'ExQual'] = 1
+    df.loc[df['GrLivArea']>=df.GrLivArea.mean(), 'LargerHouse'] = 1
+    df.loc[df['YearRemodAdd']>df['YearBuilt'], 'Remod'] = 1
 
     # Fill nulls created by .loc
     df = df.fillna(0)
@@ -150,7 +154,8 @@ def df_engineered(df):
     df = dummify_features(df)
 
     # Training and test sets 
-    df_2010 = df[df['YrSold']==2010].reset_index(drop=True)
-    df = df[df['YrSold']<2010].reset_index(drop=True)
+    #df_2010 = df[df['YrSold']==2010].reset_index(drop=True)
+    #df = df[df['YrSold']<2010].reset_index(drop=True)
 
-    return {'train':df, 'test':df_2010}
+    #return {'train':df, 'test':df_2010}
+    return df
