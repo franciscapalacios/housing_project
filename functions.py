@@ -92,6 +92,8 @@ def modify_features(df):
     df.loc[df['OverallQual']>7, 'ExQual'] = 1
     df.loc[df['GrLivArea']>=df.GrLivArea.mean(), 'LargerHouse'] = 1
     df.loc[df['YearRemodAdd']>df['YearBuilt'], 'Remod'] = 1
+    df.loc[df['BsmtQual']=='Ex', 'ExBsmtQual'] = 1
+    df.loc[df['YearRemodAdd']>df['YearBuilt'], 'Remod'] = 1
 
     # Fill nulls created by .loc
     df = df.fillna(0)
