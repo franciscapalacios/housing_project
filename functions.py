@@ -60,6 +60,22 @@ def add_location(x):
         return 4
     
 
+def add_roadrail1(x):
+    if 'Artery' in x:
+        return 1
+    elif 'RRAn' in x:
+        return 1
+    elif 'RRNn' in x:
+        return 1
+    elif 'RRAe' in x:
+        return 1
+    elif 'RRNe' in x:
+        return 1
+    else:
+        return 0
+
+    
+
 def modify_features(df):
     """
 
@@ -71,19 +87,24 @@ def modify_features(df):
     df.loc[df['Fireplaces']>2, 'Fireplaces'] = 2
     df.loc[df['BsmtQual']=='Po', 'BsmtQual'] = 'None'
     df.loc[df['LotShape']=='IR3', 'LotShape'] = 'IR2'
+    df.CentralAir = df.CentralAir.map({'Y': 1, 'N': 0})
 
     df.loc[df['Foundation']=='Stone', 'Foundation'] = 'BrkTil'
     df.loc[df['Foundation']=='Wood', 'Foundation'] = 'PConc'
 
     # Create new features
-    df.loc[df['YearBuilt']<1940, 'YearBuilt'] = 1940
+    #df.loc[df['YearBuilt']<1940, 'YearBuilt'] = 1940
     df['HouseAge'] = df['YrSold'] - df['YearBuilt']
     df['RemodAge'] = df['YrSold'] - df['YearRemodAdd']
     df['Location'] = df.Neighborhood.map(add_location)
     df['TotalSF'] = df['GrLivArea'] + df['TotalBsmtSF'] 
+    df['TotalBath'] = df.FullBath + df.BsmtFullBath + 0.5 * (df.HalfBath + df.BsmtHalfBath)
+    df['TotalBath'] = df.FullBath + df.BsmtFullBath + 0.5 * (df.HalfBath + df.BsmtHalfBath)
+    df.loc[df['TotalBath']>4, 'TotalBath'] = 4
+    df['RoadRail'] = df.Condition1.map(add_roadrail1)
 
 
-    # Binarize features where only a few categories appear to be correlated to SalesPrice.
+    # Binarize features 
     df.loc[df['GarageType'].isin(['Attchd', 'BuiltIn']), 'GoodGarageType'] = 1
     df.loc[df['MSZoning'].isin(['RL', 'FV']), 'Zone'] = 1
     df.loc[df['LotConfig'].isin(['CulDSac']), 'CulDSac'] = 1
@@ -93,7 +114,8 @@ def modify_features(df):
     df.loc[df['GrLivArea']>=df.GrLivArea.mean(), 'LargerHouse'] = 1
     df.loc[df['YearRemodAdd']>df['YearBuilt'], 'Remod'] = 1
     df.loc[df['BsmtQual']=='Ex', 'ExBsmtQual'] = 1
-    df.loc[df['YearRemodAdd']>df['YearBuilt'], 'Remod'] = 1
+    df.loc[df['Fireplaces']>0, 'HasFireplace'] = 1
+    df.loc[df['KitchenQual']=='Ex', 'ExKitchen'] = 1
 
     # Fill nulls created by .loc
     df = df.fillna(0)
@@ -155,9 +177,4 @@ def df_engineered(df):
     df = encode_ordinal(df)
     df = dummify_features(df)
 
-    # Training and test sets 
-    #df_2010 = df[df['YrSold']==2010].reset_index(drop=True)
-    #df = df[df['YrSold']<2010].reset_index(drop=True)
-
-    #return {'train':df, 'test':df_2010}
     return df
