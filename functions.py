@@ -1,5 +1,7 @@
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.model_selection import KFold, cross_val_score
 
 def missing_data_df(df):
     """
@@ -167,7 +169,7 @@ def dummify_features(df):
     return df
 
 
-def df_engineered(df):
+def df_engineered(df, Reg=True):
 
     df = df[df.SaleCondition == 'Normal']
     df = df[~df.MSZoning.isin(['C (all)', 'I (all)', 'A (all)', 'A (agr)'])] 
@@ -175,6 +177,31 @@ def df_engineered(df):
     df = impute_null(df)
     df = modify_features(df)
     df = encode_ordinal(df)
-    df = dummify_features(df)
+
+    if Reg:
+        df = dummify_features(df)
 
     return df
+
+
+def r2rmse_scores(model, X, y):
+
+    kf = KFold(n_splits=5, shuffle=True, random_state=10)
+
+    # R^2 
+    r2_scores = cross_val_score(model, X, y, cv=kf, scoring="r2", n_jobs=-1)
+
+    # RMSE
+    rmse_scores = np.sqrt(-cross_val_score(model, X, y, scoring="neg_mean_squared_error", cv=kf))
+
+
+    mean_r2 = np.mean(r2_scores)
+    mean_rmse = np.mean(rmse_scores)
+
+    # Print the scores
+
+    print("-" * 50)
+    print("5-fold Cross Validation Scoring")
+    print("Mean R^2 score:", mean_r2)
+    print("Mean RMSE score:", mean_rmse)
+    print("-" * 50)
