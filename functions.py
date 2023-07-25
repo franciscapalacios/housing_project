@@ -101,7 +101,6 @@ def modify_features(df):
     df['Location'] = df.Neighborhood.map(add_location)
     df['TotalSF'] = df['GrLivArea'] + df['TotalBsmtSF'] 
     df['TotalBath'] = df.FullBath + df.BsmtFullBath + 0.5 * (df.HalfBath + df.BsmtHalfBath)
-    df['TotalBath'] = df.FullBath + df.BsmtFullBath + 0.5 * (df.HalfBath + df.BsmtHalfBath)
     df.loc[df['TotalBath']>4, 'TotalBath'] = 4
     df['RoadRail'] = df.Condition1.map(add_roadrail1)
 
@@ -171,6 +170,7 @@ def dummify_features(df):
 
 def df_engineered(df, Reg=True):
 
+    df.rename(columns = {'1stFlrSF':'FlrSF1st', '2ndFlrSF':'FlrSF2nd'}, inplace = True)
     df = df[df.SaleCondition == 'Normal']
     df = df[~df.MSZoning.isin(['C (all)', 'I (all)', 'A (all)', 'A (agr)'])] 
 
