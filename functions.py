@@ -83,12 +83,13 @@ def modify_features(df):
 
     """
 
-    # Merge uderpopulated categories
+    # Merge underpopulated categories
     df.loc[df['GarageCars']>3, 'GarageCars'] = 3
     df.loc[df['TotRmsAbvGrd']>9, 'TotRmsAbvGrd'] = 9
     df.loc[df['Fireplaces']>2, 'Fireplaces'] = 2
     df.loc[df['BsmtQual']=='Po', 'BsmtQual'] = 'None'
     df.loc[df['LotShape']=='IR3', 'LotShape'] = 'IR2'
+    #df.loc[df['KitchenQual']=='Po', 'KitchenQual'] = 'Fa'
     df.CentralAir = df.CentralAir.map({'Y': 1, 'N': 0})
 
     df.loc[df['Foundation']=='Stone', 'Foundation'] = 'BrkTil'
@@ -101,8 +102,11 @@ def modify_features(df):
     df['Location'] = df.Neighborhood.map(add_location)
     df['TotalSF'] = df['GrLivArea'] + df['TotalBsmtSF'] 
     df['TotalBath'] = df.FullBath + df.BsmtFullBath + 0.5 * (df.HalfBath + df.BsmtHalfBath)
+    df['TotalFullBath'] = df.FullBath + df.BsmtFullBath
+    df['TotalHalfBath'] = df.HalfBath + df.BsmtHalfBath
     df.loc[df['TotalBath']>4, 'TotalBath'] = 4
     df['RoadRail'] = df.Condition1.map(add_roadrail1)
+    df['BedroomPerSF'] = df['BedroomAbvGr']/df['TotalSF']
 
 
     # Binarize features 
@@ -134,7 +138,7 @@ def encode_ordinal(df):
 
     ordinal_encoder = OrdinalEncoder(categories=[['Fa', 'TA', 'Gd', 'Ex'], 
                                                 ['None', 'Fa', 'TA', 'Gd', 'Ex'],
-                                                ['Po', 'Fa', 'TA', 'Gd', 'Ex'],
+                                                ['Po','Fa', 'TA', 'Gd', 'Ex'],
                                                 ['Po', 'Fa', 'TA', 'Gd', 'Ex']])
 
     X = ordinal_encoder.fit_transform(df[ordinal_features])
