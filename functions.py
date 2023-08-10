@@ -50,16 +50,17 @@ def impute_null(df):
 
     return df
 
-
+    
 def add_location(x):
-    if 'MeadowV' in x or 'BrDale' in x or 'IDOTRR' in x or 'OldTown' in x or 'Blueste' in x or 'Edwards' in x or 'BrkSide' in x:
+    if 'SWISU' in x or 'OldTown' in x or 'MeadowV' in x or 'Edwards' in x or 'IDOTRR' in x or 'NPkVill' in x or 'BrkSide' in x:
         return 1
-    elif 'Sawyer' in x or 'Landmrk' in x or 'SWISU' in x or 'NAmes' in x or 'NPkVill' in x or 'Mitchel' in x or 'NWAmes' in x:
+    elif 'NAmes' in x or 'BrDale' in x or 'NWAmes' in x or 'Sawyer' in x or 'Blmngtn' in x or 'Landmrk' in x or 'SawyerW' in x:
         return 2
-    elif 'Gilbert' in x or 'SawyerW' in x or 'Blmngtn' in x or 'Crawfor' in x or 'CollgCr' in x or 'ClearCr' in x or 'Greens' in x:
+    elif 'Mitchel' in x or 'ClearCr' in x or 'Blueste' in x or 'CollgCr' in x or 'Crawfor' in x or 'Gilbert' in x or 'StoneBr' in x:
         return 3
     else:
         return 4
+    
     
 
 def add_roadrail1(x):
